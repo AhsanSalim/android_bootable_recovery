@@ -48,6 +48,8 @@
 #include "flashutils/flashutils.h"
 #include "dedupe/dedupe.h"
 
+#include "mincharge/mincharge.h"
+
 struct selabel_handle *sehandle = NULL;
 
 static const struct option OPTIONS[] = {
@@ -418,20 +420,22 @@ copy_sideloaded_package(const char* original_path) {
 
 static char**
 prepend_title(char** headers) {
+    /*
     char* title[] = { EXPAND(RECOVERY_VERSION),
                       "",
                       NULL };
+    */
 
     // count the number of lines in our title, plus the
     // caller-provided headers.
     int count = 0;
     char** p;
-    for (p = title; *p; ++p, ++count);
+    // for (p = title; *p; ++p, ++count);
     for (p = headers; *p; ++p, ++count);
 
     char** new_headers = malloc((count+1) * sizeof(char*));
     char** h = new_headers;
-    for (p = title; *p; ++p, ++h) *h = *p;
+    // for (p = title; *p; ++p, ++h) *h = *p;
     for (p = headers; *p; ++p, ++h) *h = *p;
     *h = NULL;
 
@@ -841,7 +845,7 @@ main(int argc, char **argv) {
 
     device_ui_init(&ui_parameters);
     ui_init();
-    ui_print(EXPAND(RECOVERY_VERSION)"\n");
+    // ui_print(EXPAND(RECOVERY_VERSION)"\n");
     load_volume_table();
     process_volumes();
     LOGI("Processing arguments.\n");
@@ -886,10 +890,12 @@ main(int argc, char **argv) {
 
     sehandle = selabel_open(SELABEL_CTX_FILE, seopts, 1);
 
+    /*
     if (!sehandle) {
         fprintf(stderr, "Warning: No file_contexts\n");
         ui_print("Warning:  No file_contexts\n");
     }
+    */
 
     LOGI("device_recovery_start()\n");
     device_recovery_start();
@@ -981,6 +987,7 @@ main(int argc, char **argv) {
         ui_set_background(BACKGROUND_ICON_ERROR);
     }
     else if (status != INSTALL_SUCCESS || ui_text_visible()) {
+        initCharge();
         prompt_and_wait();
     }
 

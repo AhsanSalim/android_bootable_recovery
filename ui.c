@@ -42,6 +42,14 @@ static int gShowBackButton = 1;
 static int gShowBackButton = 0;
 #endif
 
+#define RECOVERY_SHOW_NAME
+
+#ifdef RECOVERY_SHOW_NAME
+#define RECOVERY_CHARGE_LINE 2
+#else
+#define RECOVERY_CHARGE_LINE 1
+#endif //RECOVERY_SHOW_NAME
+
 #define MAX_COLS 96
 #define MAX_ROWS 32
 
@@ -242,6 +250,8 @@ static void draw_text_line(int row, const char* t) {
 // Should only be called with gUpdateMutex locked.
 static void draw_screen_locked(void)
 {
+    char*  chgText;
+    
     if (!ui_has_initialized) return;
     draw_background_locked(gCurrentIcon);
     draw_progress_locked();
@@ -263,6 +273,12 @@ static void draw_screen_locked(void)
 
             gr_color(HEADER_TEXT_COLOR);
             for (i = 0; i < menu_top; ++i) {
+#ifdef RECOVERY_CHARGE_ENABLE
+                if(i == RECOVERY_CHARGE_LINE) {
+                    chgText = getChargeString();
+                    memcpy(menu[i], chgText, 16);
+                }
+#endif //RECOVERY_CHARGE_ENABLE
                 draw_text_line(i, menu[i]);
                 row++;
             }
@@ -371,7 +387,11 @@ static void *progress_thread(void *cookie)
             }
         }
 
+#ifndef RECOVERY_CHARGE_ENABLE
         if (redraw) update_progress_locked();
+#else
+        update_progress_locked();
+#endif //RECOVERY_CHARGE_ENABLE
 
         pthread_mutex_unlock(&gUpdateMutex);
         double end = now();
@@ -745,11 +765,31 @@ void ui_printlogtail(int nb_lines) {
 
 int ui_start_menu(char** headers, char** items, int initial_selection) {
     int i;
+    int j;
+    char* title[] = { EXPAND(RECOVERY_VERSION),
+#ifdef RECOVERY_SHOW_NAME
+                      "Customized Recovery by Trinopoty",
+#endif //RECOVERY_SHOW_NAME
+#ifdef RECOVERY_CHARGE_ENABLE
+                      NULL,
+#endif //RECOVERY_CHARGE_ENABLE
+                      "",
+                      NULL };
+                      
+#ifdef RECOVERY_CHARGE_ENABLE
+        title[RECOVERY_CHARGE_LINE] = getChargeString();
+#endif //RECOVERY_CHARGE_ENABLE
+    
     pthread_mutex_lock(&gUpdateMutex);
     if (text_rows > 0 && text_cols > 0) {
-        for (i = 0; i < text_rows; ++i) {
-            if (headers[i] == NULL) break;
-            strncpy(menu[i], headers[i], text_cols-1);
+        for (i = 0, j = 0; i < text_rows; ++i, ++j) {
+            if (title[j] == NULL) break;
+            strncpy(menu[i], title[j], text_cols-1);
+            menu[i][text_cols-1] = '\0';
+        }        
+        for (j = 0; i < text_rows; ++i, ++j) {
+            if (headers[j] == NULL) break;
+            strncpy(menu[i], headers[j], text_cols-1);
             menu[i][text_cols-1] = '\0';
         }
         menu_top = i;

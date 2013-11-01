@@ -44,6 +44,10 @@ LOCAL_CFLAGS += -DRECOVERY_VERSION="$(RECOVERY_VERSION)"
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)
 
+ifdef RECOVERY_CHARGE_ENABLE
+LOCAL_CFLAGS += -DRECOVERY_CHARGE_ENABLE
+endif
+
 ifdef BOARD_TOUCH_RECOVERY
 ifeq ($(BOARD_USE_CUSTOM_RECOVERY_FONT),)
   BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_15x24.h\"
@@ -96,6 +100,8 @@ LOCAL_STATIC_LIBRARIES += libdedupe libcrypto_static libcrecovery libflashutils 
 ifeq ($(BOARD_USES_BML_OVER_MTD),true)
 LOCAL_STATIC_LIBRARIES += libbml_over_mtd
 endif
+
+LOCAL_STATIC_LIBRARIES += libmincharge
 
 LOCAL_STATIC_LIBRARIES += libminui libpixelflinger_static libpng libcutils
 LOCAL_STATIC_LIBRARIES += libstdc++ libc
@@ -166,6 +172,7 @@ include $(commands_recovery_local_path)/bmlutils/Android.mk
 include $(commands_recovery_local_path)/dedupe/Android.mk
 include $(commands_recovery_local_path)/flashutils/Android.mk
 include $(commands_recovery_local_path)/libcrecovery/Android.mk
+include $(commands_recovery_local_path)/mincharge/Android.mk
 include $(commands_recovery_local_path)/minui/Android.mk
 include $(commands_recovery_local_path)/minelf/Android.mk
 include $(commands_recovery_local_path)/minzip/Android.mk

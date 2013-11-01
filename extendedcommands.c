@@ -459,6 +459,7 @@ static struct lun_node *lun_tail = NULL;
 
 int control_usb_storage_set_lun(Volume* vol, bool enable, const char *lun_file) {
     const char *vol_device = enable ? vol->device : "";
+    char adb_en[4];
     int fd;
     struct lun_node *node;
 
@@ -499,6 +500,10 @@ int control_usb_storage_set_lun(Volume* vol, bool enable, const char *lun_file) 
         }
 
         LOGI("Successfully %sshared %s on LUN file %s\n", enable ? "" : "un", vol->device, lun_file);
+        bzero(adb_en, 4);
+        property_get("ro.debuggable", adb_en, "0");
+        if(adb_en[0] == '0') property_set("sys.usb.config", enable? "mass_storage" : "none");
+        else property_set("sys.usb.config", enable? "mass_storage,adb" : "adb");
         return 0;
     }
 }

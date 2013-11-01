@@ -147,7 +147,7 @@ static int tar_compress_wrapper(const char* backup_path, const char* backup_file
 
 static int tar_dump_wrapper(const char* backup_path, const char* backup_file_image, int callback) {
     char tmp[PATH_MAX];
-    sprintf(tmp, "cd $(dirname %s); tar cv --exclude=data/data/com.google.android.music/files/* %s $(basename %s) 2> /dev/null | cat", backup_path, strcmp(backup_path, "/data") == 0 && is_data_media() ? "--exclude 'media'" : "", backup_path);
+    sprintf(tmp, "cd $(dirname %s); tar c --exclude=data/data/com.google.android.music/files/* %s $(basename %s) 2> /dev/null | cat", backup_path, strcmp(backup_path, "/data") == 0 && is_data_media() ? "--exclude 'media'" : "", backup_path);
 
     return __system(tmp);
 }
