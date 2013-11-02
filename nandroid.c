@@ -128,7 +128,7 @@ static int mkyaffs2image_wrapper(const char* backup_path, const char* backup_fil
 
 static int tar_compress_wrapper(const char* backup_path, const char* backup_file_image, int callback) {
     char tmp[PATH_MAX];
-    sprintf(tmp, "cd $(dirname %s) ; touch %s.tar ; (tar cv --exclude=data/data/com.google.android.music/files/* %s $(basename %s) | split -a 1 -b 1000000000 /proc/self/fd/0 %s.tar.) 2> /proc/self/fd/1 ; exit $?", backup_path, backup_file_image, strcmp(backup_path, "/data") == 0 && is_data_media() ? "--exclude 'media'" : "", backup_path, backup_file_image);
+    sprintf(tmp, "cd $(dirname %s) ; touch %s.tar ; (tar c --exclude=data/data/com.google.android.music/files/* %s $(basename %s) | split -a 1 -b 1000000000 /proc/self/fd/0 %s.tar.) 2> /proc/self/fd/1 ; exit $?", backup_path, backup_file_image, strcmp(backup_path, "/data") == 0 && is_data_media() ? "--exclude 'media'" : "", backup_path, backup_file_image);
 
     FILE *fp = __popen(tmp, "r");
     if (fp == NULL) {
@@ -496,7 +496,7 @@ static int unyaffs_wrapper(const char* backup_file_image, const char* backup_pat
 
 static int tar_extract_wrapper(const char* backup_file_image, const char* backup_path, int callback) {
     char tmp[PATH_MAX];
-    sprintf(tmp, "cd $(dirname %s) ; cat %s* | tar xv ; exit $?", backup_path, backup_file_image);
+    sprintf(tmp, "cd $(dirname %s) ; cat %s* | tar x ; exit $?", backup_path, backup_file_image);
     FILE *fp = __popen(tmp, "r");
     if (fp == NULL) {
         ui_print("Unable to execute tar.\n");
@@ -540,7 +540,7 @@ static int dedupe_extract_wrapper(const char* backup_file_image, const char* bac
 
 static int tar_undump_wrapper(const char* backup_file_image, const char* backup_path, int callback) {
     char tmp[PATH_MAX];
-    sprintf(tmp, "cd $(dirname %s) ; tar xv ", backup_path);
+    sprintf(tmp, "cd $(dirname %s) ; tar x ", backup_path);
 
     return __system(tmp);
 }
